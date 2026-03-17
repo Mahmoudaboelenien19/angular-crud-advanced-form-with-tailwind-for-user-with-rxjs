@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   catchError,
+  delay,
   EMPTY,
   finalize,
   map,
@@ -19,6 +20,8 @@ export class GlobalObservablesHandlerService {
   ) {
     loading.next(true);
     return source.pipe(
+      // i added delay to show spinners
+      delay(800),
       map((res) => res),
       finalize(() => {
         loading.next(false);

@@ -1,0 +1,15 @@
+<form class="flex" [formGroup]="searchForm" (submit)="search()">
+  <mat-form-field class="w-96">
+    <mat-label> Search By Name</mat-label>
+    <input type="text" matInput formControlName="search" placeholder="" />
+    <div matSuffix class="w-16 flex justify-center items-center">
+      @if (loading$ | async) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <button type="submit">
+          <mat-icon>search</mat-icon>
+        </button>
+      }
+    </div>
+  </mat-form-field>
+</form>
