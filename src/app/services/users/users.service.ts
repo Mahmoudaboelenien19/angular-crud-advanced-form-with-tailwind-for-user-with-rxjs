@@ -47,6 +47,9 @@ export class UsersService {
 
   actionLoading = new BehaviorSubject(false);
   actionLoading$ = this.actionLoading.asObservable();
+
+  actionCompleted = new BehaviorSubject(false);
+  actionCompleted$ = this.actionCompleted.asObservable();
   state$ = new BehaviorSubject<State>({
     page: 0,
     total: 0,
@@ -94,7 +97,7 @@ export class UsersService {
     return this.http
       .get<
         User[]
-      >(`http://localhost:3000/users?_page=${page + 1}&_limit=${Page_Size}`, { observe: 'response' })
+      >(`http://localhost:3000/users?_page=${page + 1}&_limit=${Page_Size}&_sort=id&_order=desc`, { observe: 'response' })
       .pipe(
         map((response: HttpResponse<User[]>) => {
           const totalCount = Number(response.headers.get('X-Total-Count'));
@@ -137,6 +140,7 @@ export class UsersService {
   }
 
   addUserAction(u: User) {
+    this.actionCompleted.next(false);
     this.add$.next(u);
   }
   addUser(u: User) {
@@ -147,6 +151,9 @@ export class UsersService {
     return this._ob_handler
       .withLoadingAndError(this.addUser(u), this.actionLoading)
       .pipe(
+        tap(() => {
+          this.actionCompleted.next(true);
+        }),
         concatMap(() =>
           this.getAllUsers(1).pipe(
             map((users) => ({ users, type: 'refresh' })),
