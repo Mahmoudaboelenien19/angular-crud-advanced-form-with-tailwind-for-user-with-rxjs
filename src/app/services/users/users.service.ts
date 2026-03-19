@@ -7,10 +7,12 @@ import {
   map,
   merge,
   Observable,
+  pipe,
   scan,
   startWith,
   Subject,
   switchMap,
+  tap,
 } from 'rxjs';
 import { GlobalObservablesHandlerService } from '../globalObservablesHandler/global-observables-handler.service';
 import { User } from '../../models/user.model';
@@ -18,6 +20,7 @@ const Page_Size = 5;
 type EffectMap = {
   getAll: { users: User[] };
   search: { users: User[] };
+  // refresh: { users: User[] };
 };
 type State = {
   page: number;
@@ -41,13 +44,17 @@ export class UsersService {
   getLoading$ = this.getLoading.asObservable();
   searchLoading = new BehaviorSubject(false);
   searchLoading$ = this.searchLoading.asObservable();
+
+  actionLoading = new BehaviorSubject(false);
+  actionLoading$ = this.actionLoading.asObservable();
   state$ = new BehaviorSubject<State>({
     page: 0,
     total: 0,
     search: '',
   });
-  private search$ = new Subject<string>();
+  private add$ = new Subject<User>();
   users$: Observable<User[]> = merge(
+    this.add$.pipe(concatMap((u) => this.addUserWithHandler(u))),
     this.state$.pipe(
       // map((p) => p.page),
       distinctUntilChanged(
@@ -68,6 +75,9 @@ export class UsersService {
           return event.users;
         case 'search':
           return event.users;
+        case 'refresh':
+          return event.users;
+
         default:
           return users;
       }
@@ -124,5 +134,24 @@ export class UsersService {
     return this._ob_handler
       .withLoadingAndError(this.searchUsers(name, page), this.searchLoading)
       .pipe(map((users) => ({ users, type: 'search' })));
+  }
+
+  addUserAction(u: User) {
+    this.add$.next(u);
+  }
+  addUser(u: User) {
+    return this.http.post<User>('http://localhost:3000/users', u);
+  }
+
+  addUserWithHandler(u: User) {
+    return this._ob_handler
+      .withLoadingAndError(this.addUser(u), this.actionLoading)
+      .pipe(
+        concatMap(() =>
+          this.getAllUsers(1).pipe(
+            map((users) => ({ users, type: 'refresh' })),
+          ),
+        ),
+      );
   }
 }
