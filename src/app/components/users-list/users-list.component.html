@@ -1,0 +1,39 @@
+@if (userList$ | async; as users) {
+  @if (loading$ | async) {
+    <div class="w-full h-96 flex justify-center items-center" @fadeInOut>
+      <mat-spinner diameter="24"></mat-spinner>
+    </div>
+  } @else {
+    @if (users.length == 0) {
+      <div class="w-full h-96 flex justify-center items-center">
+        <p @fadeInOut>No Users Found</p>
+      </div>
+    } @else {
+      <div
+        class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-3"
+        @listFadeIn
+      >
+        @for (user of users; track user.id) {
+          @if (user) {
+            <app-user-card [user]="user"> </app-user-card>
+          }
+        }
+      </div>
+    }
+  }
+}
+
+<ng-container *ngIf="state$ | async as state">
+  @if (state.total > 0) {
+    <mat-paginator
+      @fadeInOut
+      [length]="state.total"
+      [pageSize]="5"
+      [pageIndex]="state.page"
+      (page)="onChangePage($event.pageIndex)"
+      aria-label="Select page"
+      [hidePageSize]="false"
+    >
+    </mat-paginator>
+  }
+</ng-container>

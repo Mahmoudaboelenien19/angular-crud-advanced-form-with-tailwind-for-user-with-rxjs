@@ -1,0 +1,12 @@
+<div @fadeInOut>
+  <mat-label class="m-2">{{ label.toUpperCase() }}</mat-label>
+  <mat-form-field class="py-2 w-full" appearance="outline">
+    <input
+      matInput
+      [formControl]="formControl"
+      [type]="type"
+      class="max-h-12"
+    />
+    <mat-error *ngIf="errorMessage">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+</div>

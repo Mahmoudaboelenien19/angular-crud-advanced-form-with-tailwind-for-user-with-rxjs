@@ -1,0 +1,163 @@
+<h4 mat-dialog-title class="flex items-center gap-2">
+  <span>Add New User</span>
+</h4>
+
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="userForm" class="w-96 space-y-4">
+    <!-- Basic Info Section -->
+    <div class="space-y-3">
+      <shared-input
+        label="Name"
+        [control]="userFormControl('name')!"
+        [errorMessages]="{
+          required: 'Name is required',
+          minlength: 'Name must be at least 5 letters',
+        }"
+      ></shared-input>
+
+      <shared-input
+        label="Age"
+        type="number"
+        [control]="userFormControl('age')!"
+        [errorMessages]="{
+          required: 'Age is required',
+          min: 'You must be at least 15 years old',
+        }"
+      ></shared-input>
+
+      <shared-input
+        label="Email"
+        type="email"
+        [control]="userFormControl('email')!"
+        [errorMessages]="{
+          emailRequired: 'Email is required',
+          required: 'Email is required',
+          email: 'Enter a valid email address',
+        }"
+      ></shared-input>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Skills Section -->
+    <div>
+      <div class="flex items-center justify-between m-2">
+        <h5 class="text-sm font-medium text-gray-600 uppercase tracking-wide">
+          Skills
+        </h5>
+        <button
+          mat-icon-button
+          color="primary"
+          type="button"
+          (click)="addSkill()"
+          aria-label="Add skill"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <div formArrayName="skills" class="space-y-2">
+        <div
+          *ngFor="let skill of skillsControl().controls; let i = index"
+          class="flex items-center gap-2"
+        >
+          <shared-input
+            [label]="'Skill ' + (i + 1)"
+            [control]="skill"
+            [errorMessages]="{ required: 'Skill is required' }"
+            class="flex-1"
+          ></shared-input>
+          <div class="w-10">
+            <button
+              *ngIf="i > 0"
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="removeSkill(i)"
+              matTooltip="Remove skill"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Experience Section -->
+    <div>
+      <div class="flex items-center justify-between m-2 mat-typography">
+        <h6 class="text-sm font-medium text-gray-600 tracking-wide">
+          Experience
+        </h6>
+        <button
+          mat-icon-button
+          color="primary"
+          type="button"
+          (click)="addExperience()"
+          aria-label="Add experience"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <div formArrayName="experience" class="space-y-4">
+        <div
+          *ngFor="let ex of experienceControl().controls; let i = index"
+          [formGroupName]="i"
+          class="relative p-4 bg-gray-50 rounded-lg border border-gray-200"
+        >
+          <!-- Remove button (except first) -->
+          <button
+            *ngIf="i > 0"
+            mat-icon-button
+            color="warn"
+            type="button"
+            class="absolute top-2 right-2"
+            (click)="removeExperience(i)"
+            matTooltip="Remove experience"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+
+          <h6 class="text-sm font-semibold mb-3">Experience {{ i + 1 }}</h6>
+
+          <div class="space-y-3">
+            <shared-input
+              label="Title"
+              [control]="experienceControl().controls[i].get('title')!"
+              [errorMessages]="{ required: 'Title is required' }"
+            ></shared-input>
+
+            <shared-input
+              label="Years"
+              type="number"
+              [control]="experienceControl().controls[i].get('years')!"
+              [errorMessages]="{
+                required: 'Years are required',
+                min: 'Minimum 1 year',
+              }"
+            ></shared-input>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="px-6 pb-4 gap-2">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button
+    mat-button
+    color="primary"
+    (click)="addUser()"
+    [disabled]="userForm.invalid || (actionLoading$ | async)"
+  >
+    @if (actionLoading$ | async) {
+      <mat-spinner diameter="12"></mat-spinner>
+    } @else {
+      Add User
+    }
+  </button>
+</mat-dialog-actions>
