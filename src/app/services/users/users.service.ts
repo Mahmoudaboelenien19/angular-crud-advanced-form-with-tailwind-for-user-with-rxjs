@@ -58,9 +58,11 @@ export class UsersService {
   });
   private add$ = new Subject<User>();
   private edit$ = new Subject<User>();
+  private delete$ = new Subject<string>();
   users$: Observable<User[]> = merge(
     this.add$.pipe(concatMap((u) => this.addUserWithHandler(u))),
     this.edit$.pipe(concatMap((u) => this.EditUserWithHandler(u))),
+    this.delete$.pipe(concatMap((id) => this.deleteUserWithHandler(id))),
     this.state$.pipe(
       // map((p) => p.page),
       distinctUntilChanged(
@@ -163,6 +165,32 @@ export class UsersService {
           this.getAllUsers(0).pipe(
             map((users) => {
               this.changeState('page', 0);
+              return { users, type: 'refresh' } as UsersEffect;
+            }),
+          ),
+        ),
+      );
+  }
+
+  deleteUserAction(id: string) {
+    this.actionCompleted.next(false);
+    this.delete$.next(id);
+  }
+  deleteUser(id: string) {
+    return this.http.delete<User>('http://localhost:3000/users/' + id);
+  }
+
+  deleteUserWithHandler(id: string): Observable<UsersEffect> {
+    return this._ob_handler
+      .withLoadingAndError(this.deleteUser(id), this.actionLoading)
+      .pipe(
+        tap(() => {
+          this.actionCompleted.next(true);
+        }),
+        concatMap(() =>
+          this.getAllUsers(this.state$.value.page).pipe(
+            map((users) => {
+              // this.changeState('page', 0);
               return { users, type: 'refresh' } as UsersEffect;
             }),
           ),

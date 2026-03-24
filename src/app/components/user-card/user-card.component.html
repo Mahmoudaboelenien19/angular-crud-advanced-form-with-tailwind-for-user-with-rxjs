@@ -36,10 +36,14 @@
     <button
       mat-icon-button
       color="warn"
-      (click)="onDelete()"
+      (click)="onDelete(user.id?.toString() || '')"
       aria-label="Delete user"
     >
-      <mat-icon>delete</mat-icon>
+      @if (mode == "delete" && (loading$ | async)) {
+        <mat-spinner diameter="16"></mat-spinner>
+      } @else {
+        <mat-icon>delete</mat-icon>
+      }
     </button>
   </mat-card-actions>
 </mat-card>
