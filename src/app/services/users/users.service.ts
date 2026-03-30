@@ -56,6 +56,7 @@ export class UsersService {
     total: 0,
     search: '',
   });
+  
   private add$ = new Subject<User>();
   private edit$ = new Subject<User>();
   private delete$ = new Subject<string>();
